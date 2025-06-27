@@ -1,32 +1,38 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  // Access the environment variable
-  const apiKey = process.env.REACT_APP_API_KEY;
-  
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState('');
+
+  // Fetch tasks
+  const fetchTasks = async () => {
+    const response = await fetch('https://esjr3yj5mm7z4vdtwehrreykoy0trckc.lambda-url.ap-south-1.on.aws/', { method: 'GET' });
+    const data = await response.json();
+    setTasks(data);
+  };
+
+  // Add task
+  const addTask = async () => {
+    await fetch('https://esjr3yj5mm7z4vdtwehrreykoy0trckc.lambda-url.ap-south-1.on.aws/', {
+      method: 'POST',
+      body: JSON.stringify({ title: newTask })
+    });
+    fetchTasks(); // Refresh list
+  };
+
+  useEffect(() => { fetchTasks(); }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        {/* Display the API key */}
-        <div style={{ margin: '20px', padding: '10px', background: '#282c34' }}>
-          <p>API Key: {apiKey || 'Not set'}</p>
-        </div>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <input 
+        value={newTask} 
+        onChange={(e) => setNewTask(e.target.value)} 
+      />
+      <button onClick={addTask}>Add Task</button>
+      <ul>
+        {tasks.map(task => <li key={task.taskId}>{task.title}</li>)}
+      </ul>
     </div>
   );
 }
-
-export default App;
